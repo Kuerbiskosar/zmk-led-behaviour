@@ -2,6 +2,7 @@
 This repository contains a zmk behaviour made for my hugin & munin keyboard.
 the hugin & munin keyboard has two halves (hugin and munin), with 3 led's each.
 The hugin & munin keyboards are pro micro compatible (I use a nice!nano v2 for each half). The pins of the led's are expected to be 5,6 and 7 (on both halves, referring to the Arduino labels given [here](https://nicekeyboards.com/docs/nice-nano/pinout-schematic)).
+>Note: I guess this is more of a driver than a behaviour. May I be forgiven.
 
 # How it behaves
 I am aiming for the following features:
