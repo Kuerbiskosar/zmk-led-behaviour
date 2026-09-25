@@ -1,2 +1,2 @@
 zephyr_library()
-zephyr_library_sources(src/led_status.c)
+zephyr_library_sources_ifdef(CONFIG_LED_VFX src/led_status.c)

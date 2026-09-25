@@ -1,7 +1,7 @@
 # Delete all unused properties.
 
 # Give your module a name
-name: zmk-driver-led
+name: zmk-vfx-tripple-led
 build:
   # List your dependencies
   #depends:

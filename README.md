@@ -1,8 +1,8 @@
-# led behaviour for hugin & munin
+# tripple led widget for hugin & munin
 This repository contains a zmk behaviour made for my hugin & munin keyboard.
 the hugin & munin keyboard has two halves (hugin and munin), with 3 led's each.
 The hugin & munin keyboards are pro micro compatible (I use a nice!nano v2 for each half). The pins of the led's are expected to be 5,6 and 7 (on both halves, referring to the Arduino labels given [here](https://nicekeyboards.com/docs/nice-nano/pinout-schematic)).
->Note: I guess this is more of a driver than a behaviour. May I be forgiven.
+>Note: I guess this is more of a vfx than a behaviour (as the repository name suggests). May I be forgiven.
 
 # How it behaves
 I am aiming for the following features:
@@ -20,6 +20,7 @@ I am aiming for the following features:
   > Note: this behaviour will (likely) only work on the central.
 - [ ] disconnected indication
   - if the peripheral is not connected to the central / if the central is not connected to bluetooth, it will show a led animation. (like switch controller led bounce!)
+- [ ] Make timeouts / battery percentage before blinking / animation speed configurable
 
 
 ## Usage

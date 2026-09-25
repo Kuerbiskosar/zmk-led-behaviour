@@ -1,0 +1,9 @@
+config LED_VFX
+    bool "enable the whole tripple-led module"
+    default y
+    depends on ZMK_BLE
+    select PWM
+
+if LED_VFX
+
+endif # LED_VFX
