@@ -166,7 +166,7 @@ static void charge_anim_start() {
 // turn all (pwm's of the) led's off, just to re-enable them instantly)
 static void charge_anim_stop() {
     show_charge_animation = false;
-    k_work_cancel_delayable(&charge_anim, K_NO_WAIT);
+    k_work_cancel_delayable(&charge_anim);
 }
 static void charge_anim_callback(struct k_work *work) {
     if (!show_charge_animation) {
