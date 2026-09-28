@@ -157,7 +157,7 @@ static K_WORK_DELAYABLE_DEFINE(timeout_work, timeout_work_callback);
 
 static void charge_anim_start() {
     show_charge_animation = true;
-    anim_start_time = k_uptime_get32();
+    anim_start_time = k_uptime_get_32();
     k_work_reschedule(&charge_anim, K_NO_WAIT); // starts animation immediately
 }
 // NOTE: only stops the animation, without updating the led's
@@ -172,7 +172,7 @@ static void charge_anim_callback(struct k_work *work) {
     if (!show_charge_animation) {
         return;
     }
-    uint32_t anim_time = k_uptime_get32()-anim_start_time;
+    uint32_t anim_time = k_uptime_get_32()-anim_start_time;
     show_battery_charging(anim_time);
     k_work_rescedule(&charge_anim, K_MSEC(LED_FADE_STEP_MS));
 }
