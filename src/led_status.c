@@ -222,7 +222,7 @@ ZMK_SUBSCRIPTION(led_status, zmk_hid_indicators_changed);
 // handles what is going to happen
 static int led_status_listener(const zmk_event_t *eh) {
     if (as_zmk_battery_state_changed(eh) != NULL) {
-        uint8_t state_of_charge = as_zmk_battery_state_changed(eh).state_of_charge;
+        uint8_t state_of_charge = as_zmk_battery_state_changed(eh)->state_of_charge;
         // if state_of_charge is low, blink the led
         //TODO
     }
