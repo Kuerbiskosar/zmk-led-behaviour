@@ -102,7 +102,7 @@ static void show_battery_discharging() {
     set_level(2, led_levels[2]);
 }
 // triangle function starting at zero, linearly increasing to amplitude, and then linearly decreasing to zero, clamped to zero before and after x = period
-static uint_32_t triangle(uint32_t x, uint32_t amplitude, uint32_t period) {
+static uint32_t triangle(uint32_t x, uint32_t amplitude, uint32_t period) {
     uint32_t c_x = (x<0) ? 0 : ( (x>period) ? period : x); 
     return (c_x<period/2) ? c_x*amplitude*2/period : (period-c_x)*amplitude*2/period;
 }
