@@ -53,7 +53,7 @@ static void set_level(int led_idx, uint32_t permille) {
     // note: if the pwm period is set to longer than 4'294'967 nanoseconds (4 milliseconds, ), this will result in a overflow.
     // clamp permille to max 1000
     uint32_t c_permille = (permille > 1000) ? 1000 : permille;
-    pwm_set_pulse_dt(&leds[i], &leds[led_idx].period * permille / 1000);
+    pwm_set_pulse_dt(&leds[led_idx], &leds[led_idx].period * permille / 1000);
 }
 
 // Turn the led's on or off
