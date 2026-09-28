@@ -53,7 +53,7 @@ static void set_level(int led_idx, uint32_t permille) {
     // note: if the pwm period is set to longer than 4'294'967 nanoseconds (4 milliseconds, ), this will result in a overflow.
     // clamp permille to max 1000
     uint32_t c_permille = (permille > 1000) ? 1000 : permille;
-    pwm_set_pulse_dt(&leds[led_idx], leds[led_idx].period * permille / 1000);
+    pwm_set_pulse_dt(&leds[led_idx], leds[led_idx].period * c_permille / 1000);
 }
 
 // Turn the led's on or off
@@ -96,7 +96,7 @@ static void show_battery_discharging() {
     uint8_t charge = zmk_battery_state_of_charge();
     // TODO: low battery blink
     uint32_t led_levels[] = {0, 0, 0};
-    led_charge_brightness(led_levels, charge)
+    led_charge_brightness(led_levels, charge);
     set_level(0, led_levels[0]);
     set_level(1, led_levels[1]);
     set_level(2, led_levels[2]);
@@ -113,13 +113,13 @@ static uint32_t max(a, b) {
 // basically plays / defines the animation, when called periodically
 static void show_battery_charging(uint32_t anim_time_ms) {
     uint8_t charge = zmk_battery_state_of_charge();
-    uint32_t led_levels[] = {0, 0, 0}
-    led_charge_brightness(led_levels, charge)
+    uint32_t led_levels[] = {0, 0, 0};
+    led_charge_brightness(led_levels, charge);
     uint32_t fade_period_ms = 2000;
     uint32_t fade_amplitude = 1000; // led brightness in permille
     // the individual led triangle functions overlap 50%, after 2*fade_period_ms,
     // the third led will be off again. At that point, we want to restart the animation
-    uint32_t anim_cycle_time = 2*fade_period_ms
+    uint32_t anim_cycle_time = 2*fade_period_ms;
     // start with led0 fully off
     // offsets chosen to keep the total brightness 100% (ex. after fade_period_ms/2, led1 is at 50%, led2 at 50%)
     // note that the numbers will underflow in the first few seconds. We don't care about this here, because the triangle
@@ -174,7 +174,7 @@ static void charge_anim_callback(struct k_work *work) {
     }
     uint32_t anim_time = k_uptime_get32()-anim_start_time;
     show_battery_charging(anim_time);
-    k_work_rescedule(&charge_anim, K_MSEC(LED_FADE_STEP_MS))
+    k_work_rescedule(&charge_anim, K_MSEC(LED_FADE_STEP_MS));
 }
 
 // started through the zephyr work queue (update work)
