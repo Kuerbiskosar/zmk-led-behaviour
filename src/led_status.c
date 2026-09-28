@@ -125,9 +125,9 @@ static void show_battery_charging(uint32_t anim_time_ms) {
     // note that the numbers will underflow in the first few seconds. We don't care about this here, because the triangle
     // function returns 0 for all values outside [0..fade_period].
     uint32_t x = anim_cycle_time % anim_cycle_time;
-    uint32_t led0_brightness = triangle(x, fade_amplitude, fade_period);
-    uint32_t led1_brightness = triangle(x - fade_period, fade_amplitude, fade_period);
-    uint32_t led2_brightness = triangle(x - 2*fade_period, fade_amplitude, fade_period);
+    uint32_t led0_brightness = triangle(x, fade_amplitude, fade_period_ms);
+    uint32_t led1_brightness = triangle(x - fade_period_ms, fade_amplitude, fade_period_ms);
+    uint32_t led2_brightness = triangle(x - 2*fade_period_ms, fade_amplitude, fade_period_ms);
 
     set_level(0, max(led_levels[0], led0_brightness));
     set_level(1, max(led_levels[1], led1_brightness));
