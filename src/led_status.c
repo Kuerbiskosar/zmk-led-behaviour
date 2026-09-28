@@ -5,6 +5,7 @@
 #include <zmk/event_manager.h>
 #include <zmk/battery.h>
 #include <zmk/events/battery_state_changed.h>
+#include <zmk/events/activity_state_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 
 
@@ -174,7 +175,7 @@ static void charge_anim_callback(struct k_work *work) {
     }
     uint32_t anim_time = k_uptime_get_32()-anim_start_time;
     show_battery_charging(anim_time);
-    k_work_rescedule(&charge_anim, K_MSEC(LED_FADE_STEP_MS));
+    k_work_reschedule(&charge_anim, K_MSEC(LED_FADE_STEP_MS));
 }
 
 // started through the zephyr work queue (update work)
