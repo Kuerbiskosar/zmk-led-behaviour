@@ -106,7 +106,7 @@ static uint32_t triangle(uint32_t x, uint32_t amplitude, uint32_t period) {
     uint32_t c_x = (x<0) ? 0 : ( (x>period) ? period : x); 
     return (c_x<period/2) ? c_x*amplitude*2/period : (period-c_x)*amplitude*2/period;
 }
-static uint32_t max(a, b) {
+static uint32_t max(uint32_t a, uint32_t b) {
     return (a>b) ? a : b;
 }
 // sets led's to the "animation frame" at the given time
