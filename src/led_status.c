@@ -147,8 +147,8 @@ static void charge_anim_stop();
 static void charge_anim_callback(struct k_work *work);
 static K_WORK_DELAYABLE_DEFINE(charge_anim, charge_anim_callback);
 
-update_work_callback(struct k_work *work);
-timeout_work_callback(struct k_work *work);
+static void update_work_callback(struct k_work *work);
+static void timeout_work_callback(struct k_work *work);
 // work name, callback name
 static K_WORK_DEFINE(update_work, update_work_callback);
 static K_WORK_DELAYABLE_DEFINE(timeout_work, timeout_work_callback);
