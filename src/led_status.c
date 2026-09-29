@@ -198,6 +198,7 @@ static void update_work_callback(struct k_work *work) {
 // triggered through a timer, disabling the led's
 static void timeout_work_callback(struct k_work *work) {
     show_battery = false;
+    show_charge_animation = false;
     // do this instead of calling set_leds(false, false, false) directly
     // to keep the behaviour in the update_work_callback function
     k_work_submit(&update_work);
@@ -307,10 +308,14 @@ static int led_status_init(void) {
         }
     }
     show_battery = true;
+    set_level(0, 1000);
+    set_level(1, 500);
+    set_lefel(2, 250);
     k_work_reschedule(&timeout_work, K_MSEC(BATTERY_SHOW_MS));
     k_work_submit(&update_work);
     return 0;
 }
 
-SYS_INIT(led_status_init, APPLICATION, 90);
-
+//SYS_INIT(led_status_init, APPLICATION, 90);
+//              name,         stack_size, entrry, p1, p2, p3, Thread priority, Thread options, delay
+K_THREAD_DEFINE(led_init_tid, 1024, led_status_init, NULL, NULL, NULL, K_LOWEST_APPLICATION_THREAD_PRIO, 0, 200)
