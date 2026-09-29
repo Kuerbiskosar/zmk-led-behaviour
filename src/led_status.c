@@ -226,7 +226,7 @@ static int led_status_listener(const zmk_event_t *eh) {
         // if state_of_charge is low, blink the led
         //TODO
     }
-    struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed;
+    struct zmk_activity_state_changed *ev = as_zmk_activity_state_changed(eh);
     if (ev != NULL) {
         // TODO: implement this such, that if we exit sleep by switching to a layer,
         // which uses the led's for something else, the battery still gets shown AFTER the key is released
@@ -252,7 +252,7 @@ static int led_status_listener(const zmk_event_t *eh) {
         }
     }
 
-    struct zmk_layer_state_changed *ev = as_zmk_layer_state_changed;
+    struct zmk_layer_state_changed *ev = as_zmk_layer_state_changed(eh);
     if (ev != NULL) {
         bool display_bluetooth = zmk_layer_active(BLUETOOTH_LAYER);
         bool display_indicators = zmk_layer_active(INDICATOR_LAYER);
@@ -268,7 +268,7 @@ static int led_status_listener(const zmk_event_t *eh) {
         k_work_submit(&update_work);
     }
 
-    struct zmk_usb_conn_state_changed *ev = as_zmk_usb_conn_state_changed;
+    struct zmk_usb_conn_state_changed *ev = as_zmk_usb_conn_state_changed(eh);
     if (ev != NULL) {
         switch (ev->conn_state) {
             case ZMK_USB_CONN_NONE:
