@@ -318,4 +318,4 @@ static int led_status_init(void) {
 
 //SYS_INIT(led_status_init, APPLICATION, 90);
 //              name,         stack_size, entrry, p1, p2, p3, Thread priority, Thread options, delay
-K_THREAD_DEFINE(led_init_tid, 1024, led_status_init, NULL, NULL, NULL, K_LOWEST_APPLICATION_THREAD_PRIO, 0, 200)
+K_THREAD_DEFINE(led_init_tid, 1024, led_status_init, NULL, NULL, NULL, K_LOWEST_APPLICATION_THREAD_PRIO, 0, 200);
