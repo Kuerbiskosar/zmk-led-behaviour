@@ -254,15 +254,15 @@ static int led_status_listener(const zmk_event_t *eh) {
 
     struct zmk_layer_state_changed *ev_lay = as_zmk_layer_state_changed(eh);
     if (ev_lay != NULL) {
-        bool display_bluetooth = zmk_layer_active(BLUETOOTH_LAYER);
-        bool display_indicators = zmk_layer_active(INDICATOR_LAYER);
+        bool display_bluetooth = zmk_keymap_layer_active(BLUETOOTH_LAYER);
+        bool display_indicators = zmk_keymap_layer_active(INDICATOR_LAYER);
         //bluetooth
         // TODO: find better way to check if display bluetooth is the highest active layer with behaviour
         // because I may want another layer to force-show the battery state
         // NOTE: this would be easy, if we knew if bluetooth is actually the higher layer
-        if ((display_bluetooth && !display_indicators) || (display_bluetooth & display_indicators) & BLUETOOTH_LAYER > INDICATOR_LAYER) {
+        if ((display_bluetooth && !display_indicators) || (display_bluetooth && display_indicators) && (BLUETOOTH_LAYER > INDICATOR_LAYER)) {
             display_state = bluetooth;
-        } else if ((display_indicators && !display_bluetooth) || (display_indicators & display_bluetooth) & INDICATOR_LAYER > BLUETOOTH__LAYER){
+        } else if ((display_indicators && !display_bluetooth) || (display_indicators & display_bluetooth) & INDICATOR_LAYER > BLUETOOTH_LAYER){
             display_state = indicators;
         }
         k_work_submit(&update_work);
