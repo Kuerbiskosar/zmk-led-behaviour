@@ -251,7 +251,7 @@ static int led_status_listener(const zmk_event_t *eh) {
                 break;
         }
     }
-
+#ifdef HAS_CENTRAL_STATE
     struct zmk_layer_state_changed *ev_lay = as_zmk_layer_state_changed(eh);
     if (ev_lay != NULL) {
         bool display_bluetooth = zmk_keymap_layer_active(BLUETOOTH_LAYER);
@@ -267,7 +267,7 @@ static int led_status_listener(const zmk_event_t *eh) {
         }
         k_work_submit(&update_work);
     }
-
+#endif
     struct zmk_usb_conn_state_changed *ev_conn = as_zmk_usb_conn_state_changed(eh);
     if (ev_conn != NULL) {
         switch (ev_conn->conn_state) {
