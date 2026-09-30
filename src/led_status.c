@@ -202,7 +202,7 @@ static void charge_anim_stop() {
     k_work_cancel_delayable(&charge_anim);
 }
 static void charge_anim_callback(struct k_work *work) {
-    if (!display_state = charging) {
+    if (!display_state == charging) {
         return;
     }
     uint32_t anim_time = k_uptime_get_32()-anim_start_time;
