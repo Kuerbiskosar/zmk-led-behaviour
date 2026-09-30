@@ -26,10 +26,10 @@ LOG_MODULE_REGISTER(led_status, LOG_LEVEL_INF); // TODO: check logging options a
 enum led_display {
     off, discharging, charging, low_battery_warn, bluetooth, indicators
 };
-static volatile enum led_display display_state = none;
+static volatile enum led_display display_state = off;
 // state to recover, after a temporary display was activated.
-// This is usually none, but if we charge, we may want to go back to the charging animation
-static volatile enum led_display base_state = none;
+// This is usually off, but if we charge, we may want to go back to the charging animation
+static volatile enum led_display base_state = off;
 // to change the state, this function needs to be called.
 // it turns off whatever there was previously, and turn on the new thing
 // Note: changing from discharging to discharging (same state) will update the displayed charge
@@ -298,7 +298,7 @@ static int led_status_listener(const zmk_event_t *eh) {
         switch (ev_conn->conn_state) {
             case ZMK_USB_CONN_NONE:
                 // show battery when unplugging
-                base_state = none; // after the timeout, make the displays off
+                base_state = off; // after the timeout, make the displays off
                 set_display_state(discharging)
                 k_work_reschedule(&timeout_work, K_MSEC(BATTERY_SHOW_MS));
                 break;
