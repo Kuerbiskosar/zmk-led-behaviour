@@ -19,19 +19,65 @@
 #define HAS_CENTRAL_STATE 1
 #endif
 
+#include "led_status.h"
+
 LOG_MODULE_REGISTER(led_status, LOG_LEVEL_INF); // TODO: check logging options and necessity
-
-#define BATTERY_SHOW_MS 5000
-#define LED_FADE_STEP_MS 40 // time between led update during animations. 40 ms = 25 Hz
-
-#define BLUETOOTH_LAYER 4
-#define INDICATOR_LAYER 2
-
-// what should be displayed on the leds
+// what is displayed on the leds
 enum led_display {
-    none, bluetooth, indicators
+    off, discharging, charging, low_battery_warn, bluetooth, indicators
 };
 static volatile enum led_display display_state = none;
+// state to recover, after a temporary display was activated.
+// This is usually none, but if we charge, we may want to go back to the charging animation
+static volatile enum led_display base_state = none;
+// to change the state, this function needs to be called.
+// it turns off whatever there was previously, and turn on the new thing
+// Note: changing from discharging to discharging (same state) will update the displayed charge
+static void set_display_state(led_display new_state) {
+    led_display old_state = display_state;
+    // TODO: check if the current state is set to terminate
+    // after x seconds, if yes, stop callback
+    switch (old_state) {
+        case off:
+            break;
+        case discharging:
+            break;
+        case charging:
+            // this is an animation, which has to be stopped
+            charge_anim_stop();
+            break;
+        case low_battery_warn:
+            // TODO: once implemented, stop the low battery animation
+            break;
+        case bluetooth:
+            break;
+        case indicators:
+            break;
+        // omitting default case, hoping that the compiler warns, if not all enum cases match
+    }
+    
+    display_state = new_state;
+    switch (new_state) {
+        case off:
+            set_leds(false, false, false);
+            break;
+        case discharging:
+            show_battery_discharging();
+            break;
+        case charging:
+            // this is an animation, which has to be stopped
+            charge_anim_start();
+            break;
+        case low_battery_warn:
+            break;
+        case bluetooth:
+            // TODO: write bluetooth on function
+            break;
+        case indicators:
+            // TODO: write indicators function
+            break;
+    }
+}
 
 // fetch led definitions from device tree file (on user side)
 // expected order: led0: inner led, led1: middle led, led2: outer led
@@ -44,8 +90,6 @@ static const struct pwm_dt_spec leds[3] = {
 // To save power, the led's should be off most of the time.
 // this variable gets turned on, when the keyboard gets turned on
 // and turns off after BATTERY_SHOW_MS
-static volatile bool show_battery = false;
-static volatile bool show_charge_animation = false;
 
 // Set the led at the given index (0 - 3) to the given brightness in permille 0 = off, 1000 = full brightness 
 static void set_level(int led_idx, uint32_t permille) {
@@ -113,9 +157,11 @@ static uint32_t max(uint32_t a, uint32_t b) {
 // sets led's to the "animation frame" at the given time
 // basically plays / defines the animation, when called periodically
 static void show_battery_charging(uint32_t anim_time_ms) {
-    uint8_t charge = zmk_battery_state_of_charge();
+    //uint8_t charge = zmk_battery_state_of_charge();
     uint32_t led_levels[] = {0, 0, 0};
-    led_charge_brightness(led_levels, charge);
+    // commented out, to test the charging animation
+    // (TODO: check if charge level is valid when charging)
+    //led_charge_brightness(led_levels, charge);
     uint32_t fade_period_ms = 2000;
     uint32_t fade_amplitude = 1000; // led brightness in permille
     // the individual led triangle functions overlap 50%, after 2*fade_period_ms,
@@ -137,27 +183,11 @@ static void show_battery_charging(uint32_t anim_time_ms) {
 }
 
 //--------------------
-// TODO: maybe restructure into different file / use header files
-// event handling logic
-// event callback setup
-
-// charge animation
-uint32_t anim_start_time;
-static void charge_anim_start();
-static void charge_anim_stop();
-static void charge_anim_callback(struct k_work *work);
-static K_WORK_DELAYABLE_DEFINE(charge_anim, charge_anim_callback);
-
-static void update_work_callback(struct k_work *work);
-static void timeout_work_callback(struct k_work *work);
-// work name, callback name
-static K_WORK_DEFINE(update_work, update_work_callback);
-static K_WORK_DELAYABLE_DEFINE(timeout_work, timeout_work_callback);
-
 // event callback definitions
 
 static void charge_anim_start() {
-    show_charge_animation = true;
+    //show_charge_animation = true;
+    //display_state = charging; // set to invoce this function, I don't want recursion here
     anim_start_time = k_uptime_get_32();
     k_work_reschedule(&charge_anim, K_NO_WAIT); // starts animation immediately
 }
@@ -166,11 +196,13 @@ static void charge_anim_start() {
 // (this is done, because I probably want to switch to another presentation immediately, and therefore don't want to
 // turn all (pwm's of the) led's off, just to re-enable them instantly)
 static void charge_anim_stop() {
-    show_charge_animation = false;
+    //show_charge_animation = false;
+    //display_state = off;
+    set_leds(false, false, false);
     k_work_cancel_delayable(&charge_anim);
 }
 static void charge_anim_callback(struct k_work *work) {
-    if (!show_charge_animation) {
+    if (!display_state = charging) {
         return;
     }
     uint32_t anim_time = k_uptime_get_32()-anim_start_time;
@@ -181,27 +213,13 @@ static void charge_anim_callback(struct k_work *work) {
 // started through the zephyr work queue (update work)
 // updates the led's according to global variables set via zmk subscriber callback
 static void update_work_callback(struct k_work *work) {
-    // TODO: layer depending behaviour on central
-    // Note: stop charge anim, when using the led's.
-    if (show_charge_animation) {
-        // we need this to restart the charge animation, after the led's are used to
-        // for example show the selected bluetooth profile
-        charge_anim_start();
-        return;
-    }
-    if (show_battery) {     
-        show_battery_discharging();
-        return;
-    }
-    set_leds(false, false, false);
+    return; // I don't really need this...
 }
 // triggered through a timer, disabling the led's
 static void timeout_work_callback(struct k_work *work) {
-    show_battery = false;
-    show_charge_animation = false;
-    // do this instead of calling set_leds(false, false, false) directly
-    // to keep the behaviour in the update_work_callback function
-    k_work_submit(&update_work);
+    //show_battery = false;
+    //show_charge_animation = false;
+    set_display_state(base_state);
 }
 
 // ZMK events
@@ -229,24 +247,27 @@ static int led_status_listener(const zmk_event_t *eh) {
     }
     struct zmk_activity_state_changed *ev_act = as_zmk_activity_state_changed(eh);
     if (ev_act != NULL) {
-        // TODO: implement this such, that if we exit sleep by switching to a layer,
-        // which uses the led's for something else, the battery still gets shown AFTER the key is released
         switch (ev_act->state) {
             case ZMK_ACTIVITY_ACTIVE:
-                show_battery = true;
+                //show_battery = true;
                 // sets show_battery to false and updates led's after some time
-                k_work_submit(&update_work);
+                //k_work_submit(&update_work);
+                // show battery for BATTERY_SHOW_MS (milliseconds)
+                set_display_state(discharging);
+                // this will turn the display off
                 k_work_reschedule(&timeout_work, K_MSEC(BATTERY_SHOW_MS));
                 break;
             case ZMK_ACTIVITY_IDLE:
-                show_battery = false;
-                k_work_submit(&update_work);
+                //show_battery = false;
+                //k_work_submit(&update_work);
                 k_work_cancel_delayable(&timeout_work);
+                //set_display_state(off);
                 break;
             case ZMK_ACTIVITY_SLEEP:
-                show_battery = false;
-                k_work_submit(&update_work);
+                //show_battery = false;
+                //k_work_submit(&update_work);
                 k_work_cancel_delayable(&timeout_work);
+                //set_display_state(off);
                 break;
             default:
                 break;
@@ -257,42 +278,43 @@ static int led_status_listener(const zmk_event_t *eh) {
     if (ev_lay != NULL) {
         bool display_bluetooth = zmk_keymap_layer_active(BLUETOOTH_LAYER);
         bool display_indicators = zmk_keymap_layer_active(INDICATOR_LAYER);
+        bool home = zmk_keymap_layer_active(HOME_LAYER);
         //bluetooth
         // TODO: find better way to check if display bluetooth is the highest active layer with behaviour
         // because I may want another layer to force-show the battery state
         // NOTE: this would be easy, if we knew if bluetooth is actually the higher layer
         if ((display_bluetooth && !display_indicators) || ((display_bluetooth && display_indicators) && (BLUETOOTH_LAYER > INDICATOR_LAYER))) {
-            display_state = bluetooth;
+            set_display_state(bluetooth);
         } else if ((display_indicators && !display_bluetooth) || ((display_indicators && display_bluetooth) && INDICATOR_LAYER > BLUETOOTH_LAYER)){
-            display_state = indicators;
+            set_display_state(indicators);
+        } else if (home) {
+            set_dispay_state(base_state);
         }
-        k_work_submit(&update_work);
+        //k_work_submit(&update_work);
     }
 #endif
     struct zmk_usb_conn_state_changed *ev_conn = as_zmk_usb_conn_state_changed(eh);
     if (ev_conn != NULL) {
         switch (ev_conn->conn_state) {
             case ZMK_USB_CONN_NONE:
-                charge_anim_stop();
                 // show battery when unplugging
-                show_battery = true;
-                k_work_submit(&update_work); // to change from the last frame, to whatever we want to show (maybe we are on bluetoth show layer)
+                base_state = none; // after the timeout, make the displays off
+                set_display_state(discharging)
                 k_work_reschedule(&timeout_work, K_MSEC(BATTERY_SHOW_MS));
                 break;
             case ZMK_USB_CONN_POWERED:
-                show_charge_animation = true;
-                k_work_submit(&update_work);
+                set_display_state(charging);
+                base_state = charging;
+                //k_work_submit(&update_work);
                 break;
             case ZMK_USB_CONN_HID:
                 // do not restart the charge animation, if we entered this mode from ZMK_USB_CONN_POWERED
                 // (I don't care much about the other way around, because if a usb host suddenly stops being
                 // a usb host and only powers... I feel like that deserves restarting the charging animation)
-                if (!show_charge_animation) {
-                    show_charge_animation = true;
-                    k_work_submit(&update_work);
+                if (display_state != charging) {
+                    set_display_state(charging);
+                    base_state = charging;
                 }
-                break;
-            default:
                 break;
         }
     }
@@ -307,12 +329,9 @@ static int led_status_init(void) {
             return -ENODEV;
         }
     }
-    show_battery = true;
-    set_level(0, 1000);
-    set_level(1, 500);
-    set_level(2, 250);
+    // debug charging animation
+    set_display_state(charging);
     k_work_reschedule(&timeout_work, K_MSEC(BATTERY_SHOW_MS));
-    k_work_submit(&update_work);
     return 0;
 }
 
