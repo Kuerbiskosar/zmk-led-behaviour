@@ -5,6 +5,7 @@
 #define INDICATOR_LAYER 2
 #define HOME_LAYER      0
 
+static void set_leds(bool led0, bool led1, bool led2);
 
 // charge animation
 uint32_t anim_start_time;
