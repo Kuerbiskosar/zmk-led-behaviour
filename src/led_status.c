@@ -202,7 +202,7 @@ static void charge_anim_stop() {
     k_work_cancel_delayable(&charge_anim);
 }
 static void charge_anim_callback(struct k_work *work) {
-    if (!display_state == charging) {
+    if (display_state != charging) {
         return;
     }
     uint32_t anim_time = k_uptime_get_32()-anim_start_time;
@@ -288,7 +288,7 @@ static int led_status_listener(const zmk_event_t *eh) {
         } else if ((display_indicators && !display_bluetooth) || ((display_indicators && display_bluetooth) && INDICATOR_LAYER > BLUETOOTH_LAYER)){
             set_display_state(indicators);
         } else if (home) {
-            set_dispay_state(base_state);
+            set_display_state(base_state);
         }
         //k_work_submit(&update_work);
     }
@@ -299,7 +299,7 @@ static int led_status_listener(const zmk_event_t *eh) {
             case ZMK_USB_CONN_NONE:
                 // show battery when unplugging
                 base_state = off; // after the timeout, make the displays off
-                set_display_state(discharging)
+                set_display_state(discharging);
                 k_work_reschedule(&timeout_work, K_MSEC(BATTERY_SHOW_MS));
                 break;
             case ZMK_USB_CONN_POWERED:
