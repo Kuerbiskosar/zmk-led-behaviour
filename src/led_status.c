@@ -23,18 +23,18 @@
 
 LOG_MODULE_REGISTER(led_status, LOG_LEVEL_INF); // TODO: check logging options and necessity
 // what is displayed on the leds
-enum led_display {
+typedef enum {
     off, discharging, charging, low_battery_warn, bluetooth, indicators
-};
-static volatile enum led_display display_state = off;
+} led_display_t;
+static volatile enum led_display_t display_state = off;
 // state to recover, after a temporary display was activated.
 // This is usually off, but if we charge, we may want to go back to the charging animation
-static volatile enum led_display base_state = off;
+static volatile enum led_display_t base_state = off;
 // to change the state, this function needs to be called.
 // it turns off whatever there was previously, and turn on the new thing
 // Note: changing from discharging to discharging (same state) will update the displayed charge
-static void set_display_state(led_display new_state) {
-    led_display old_state = display_state;
+static void set_display_state(led_display_t new_state) {
+    led_display_t old_state = display_state;
     // TODO: check if the current state is set to terminate
     // after x seconds, if yes, stop callback
     switch (old_state) {
